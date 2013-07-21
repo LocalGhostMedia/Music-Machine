@@ -1,0 +1,77 @@
+.leftCol{
+	position:absolute;
+	top:0px;
+	left:0px;
+	width:35%;
+	min-height:50px;
+	height:auto;
+	padding-top:15px;
+	padding-left:15px;
+	border-bottom: 1px solid gray;
+}
+.rightCol{
+	position:absolute;
+	left:30%;
+	top:0px;
+	padding-top:10px;
+	padding-left:15px;
+	width:65%;
+	min-height:50px;
+	height:auto;
+	border-bottom: 1px solid gray;
+}
+.divRow0{
+	position:relative;
+	height:50px;
+	width:100%;
+}
+.divRow1{
+	position:relative;
+	height:50px;
+	width:100%;
+	top:50px;
+}
+.divRow2{
+	position:relative;
+	height:50px;
+	width:100%;
+	top:50px;
+}
+.divRow3{
+	position:relative;
+	height:50px;
+	width:100%;
+	top:50px;
+}
+.divRow4{
+	position:relative;
+	height:50px;
+	width:100%;
+	top:50px;
+}
+.showNum{
+	padding-top:20px;
+	padding-left:20px;
+	color:white;
+	position:relative;width:100%;height:50px;
+	border-bottom: 1px solid #458B00;
+	background:#458B00;
+}
+#showForm{
+	padding-bottom:30px;
+	border-bottom: 1px solid gray;
+}
+#bandPic{
+	position:relative;
+	top:0px;
+	height:240px;
+	background:url('images/SEEDS.jpg');
+
+	width:100%;
+}
+@font-face
+{
+	font-family: name;
+	src: url(fonts/AgentOrange.ttf) format("truetype");
+}
+#pageTitle,#navbar{font-family: name;}

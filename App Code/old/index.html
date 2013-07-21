@@ -1,0 +1,301 @@
+﻿<!DOCTYPE html><!--HTML5 doctype-->
+<html>
+    <head>
+        <title>Powered by appStarter</title>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <style>
+            
+        </style>
+        <link rel='stylesheet' type='text/css' href='css/jq.ui.eco.css' />
+        <link rel="stylesheet" type="text/css" href="css/icons.css">
+        <link rel="stylesheet" type="text/css" href="css/shows.css">
+        <script type="text/javascript" charset="utf-8" src="http://localhost:58888/_appMobi/appmobi.js"></script> 
+        <script type="text/javascript" charset="utf-8" src="http://localhost:58888/_appMobi/xhr.js"></script>  
+        <script type="text/javascript" charset="utf-8" src="libs/jq.ui.min.js"></script> 
+        <script type="text/javascript" charset="utf-8" src="libs/jq.web.min.js"></script> 
+      
+        
+        <script type="text/javascript">
+
+        var newfiles=0;
+        var imgsrc=0;
+        var boolcache=0;
+        var play="";
+        var playing=0;
+        var arrmuzac;
+        var localSaves= new Array();
+
+
+        /* This function runs once the page is loaded, but appMobi is not yet active */
+        var preroll=false;
+        $.ui.autoLaunch=false;
+        var init = function(){
+          $.ui.showBackbutton=false;
+        };
+        document.addEventListener("DOMContentLoaded",init,false);  
+
+
+        /* This code prevents users from dragging the page */
+        var preventDefaultScroll = function(event) {
+            event.preventDefault();
+            window.scroll(0,0);
+            return false;
+        };
+        window.document.addEventListener('touchmove', preventDefaultScroll, false);
+
+        /* This code is used to run as soon as appMobi activates */
+        var onDeviceReady=function(){
+            AppMobi.device.setRotateOrientation("portrait");
+            AppMobi.device.setAutoRotate(false);
+            //hide splash screen
+            AppMobi.display.useViewport(320,480);
+            AppMobi.device.hideSplashScreen();	
+            AppMobi.device.hideStatusBar();
+            
+            if(preroll){
+                AppMobiPromotion.getInterstitial();
+            }
+            $.ui.launch(); 
+
+            AppMobi.device.getRemoteData("http://www.seedsband.com/app/test/song.xml","GET","","success_Songs","error_handler_song");
+            AppMobi.cache.addToMediaCacheExt("http://www.seedsband.com/app/test/song.xml",'songs');
+
+            //AppMobi.device.getRemoteData("http://www.seedsband.com/app/test/video.xml","GET","","success_Video","error_handler_video");
+            //AppMobi.cache.addToMediaCacheExt("http://www.seedsband.com/app/test/video.xml",'video');
+
+            AppMobi.device.getRemoteData("http://www.seedsband.com/app/test/show.xml","GET","","success_Shows","error_handler_show");
+            AppMobi.cache.addToMediaCacheExt("http://www.seedsband.com/app/test/show.xml",'shows');
+
+            AppMobi.device.getRemoteData("http://www.seedsband.com/app/test/news.xml","GET","","success_News","error_handler_news");
+            AppMobi.cache.addToMediaCacheExt("http://www.seedsband.com/app/test/news.xml",'news');
+           // AppMobi.device.getRemoteData("http://azurke.ho8.com/appmobi/musicApp/examplexml.xml","GET","","success_handler","error_handler");
+           // AppMobi.device.getRemoteData("http://azurke.ho8.com/appmobi/musicApp/examplexml.xml","GET","","success_handler","error_handler");
+          
+        };
+        document.addEventListener("appMobi.device.ready",onDeviceReady,false);    
+
+function cacheCheck(){
+
+            localSaves = AppMobi.cache.getCookie('localSaves');
+            console.log('localSaves= '+localSaves);
+            if(localSaves==undefined)
+                {console.log(arrmuzac.length);
+                    localSaves = new Array();
+                    for (var i = arrmuzac.length - 1; i >= 0; i--) {
+                        console.log(arrmuzac[i]);
+                        localSaves[i]=arrmuzac[i];
+                    };
+
+                AppMobi.cache.setCookie('localSaves',localSaves,-1);
+                 console.log('second localSaves= '+localSaves);
+                //console.log(localSaves);
+            }
+            else{
+                var both;
+                for (var i = localSaves.length - 1; i >= 0; i--) {
+
+                        var both= false;
+
+                            for (var j = arrmuzac.length - 1; j >= 0; j--) {
+                                 if(localSaves[i]==arrmuzac[j]){both=true}
+                                    console.log("arrmuzac = "+arrmuzac[j])
+                            }
+
+                        if(both==false){console.log(localSaves);}//AppMobi.cache.removeFromMediaCache(localSaves[i])}
+                };
+            }
+
+
+}
+
+
+function error_handler_news(){              
+                var localURL = AppMobi.cache.getMediaCacheLocalURL("http://www.seedsband.com/app/test/news.xml");
+                success_News(localURL);
+                }
+function error_handler_show(){                
+                var localURL = AppMobi.cache.getMediaCacheLocalURL("http://www.seedsband.com/app/test/show.xml");
+                success_Shows(localURL);
+                }    
+function error_handler_song(){                
+                var localURL = AppMobi.cache.getMediaCacheLocalURL("http://www.seedsband.com/app/test/song.xml");
+                success_Songs(localURL);
+                }    
+
+
+
+function success_News (data)
+            {
+
+                parser=new DOMParser();
+                xmlData=parser.parseFromString(data,"text/xml");
+                xmlData.alltext = data;
+
+                news='';
+
+                newsTitle=xmlData.getElementsByTagName('title');
+                newsPubdate=xmlData.getElementsByTagName('pubDate');
+                newsContent=xmlData.getElementsByTagName('content');
+
+                for (i=0;i<newsTitle.length;i++)
+                {
+                news+="<center><br><table width='100%' style='border:gray 1px solid;background-image: -webkit-linear-gradient(bottom, #FFFFFF 0%, #E6E2B5 100%);'class='newsTable'><tr><td><strong>"+(newsTitle[i].childNodes[0].nodeValue)+"</strong><br><br>"+ (newsPubdate[i].childNodes[0].nodeValue)+"<br><br>"+(newsContent[i].childNodes[0].nodeValue)+"</td></tr></table><br></center>";
+                }
+                 document.getElementById('Home').innerHTML=news;
+
+            }
+
+function success_Shows (data)
+            {
+                parser=new DOMParser();
+                xmlData=parser.parseFromString(data,"text/xml");
+                xmlData.alltext = data;
+                gigs='';
+/*
+                gigs="<ul data-position='static'><li><table style='background:#E6E2B5;width:100%'valign='top'><tr valign='top'><td width='25%'>Date</td><td>Venue</td><td>Price</td><td>Description</td></tr></li>";*/
+
+                showDate=xmlData.getElementsByTagName('date');
+                showVenue=xmlData.getElementsByTagName('venue');
+                showDescrip=xmlData.getElementsByTagName('description');
+                showPrice=xmlData.getElementsByTagName('price');
+
+               /*  for (i=0;i<showDate.length;i++)
+                {
+                gigs+="<br><table width='100%''><tr width='100%'><td width='25%'>"+(showDate[i].childNodes[0].nodeValue)+"</td><td width='50%'>"+ (showVenue[i].childNodes[0].nodeValue)+"</td><td>"+(showPrice[i].childNodes[0].nodeValue)+"</td></tr><tr></table><table class='showdesc'><tr><td>"+(showDescrip[i].childNodes[0].nodeValue)+"</td></tr></table><br>";
+                }*/
+
+                for (i=0;i<showDate.length;i++)
+                {
+                gigs+='<div  style="margin-top:0px!important" class="form-wrapper cf" id="showForm">Show #'+(i+1)+'<table><tr><td>Date:</td><td>'+(showDate[i].childNodes[0].nodeValue)+'</td></tr><tr><td>Venue:</td><td>'+ (showVenue[i].childNodes[0].nodeValue)+'</td></tr><tr><td>Price:</td><td>$'+(showPrice[i].childNodes[0].nodeValue)+'</td></tr><tr><td>Description:</td><td>'+(showDescrip[i].childNodes[0].nodeValue)+'</td></tr></table></div>'
+                }
+                document.getElementById('Shows').innerHTML=gigs;
+
+                /*"<li><table style='width:100%;border-bottom:2px solid black; background:#798E19;'valign='top'><tr valign='top'><td width='20%'>"+(showDate[i].childNodes[0].nodeValue)+"</td><td width='30%'>"+ (showVenue[i].childNodes[0].nodeValue)+"</td><td style='padding-right:10px'width='5%'>"+(showPrice[i].childNodes[0].nodeValue)+"</td><td width='45%'>"+(showDescrip[i].childNodes[0].nodeValue)+"</td></tr></li>";*/
+
+            }
+
+function success_Songs (data) 
+            { 
+                // Un-comment out the code below to clear media cache of all songs previously loaded on device
+                parser=new DOMParser();
+                xmlData=parser.parseFromString(data,"text/xml");
+                xmlData.alltext = data;
+
+                muzac='';
+
+                songTitle=xmlData.getElementsByTagName('title');
+                itunes=xmlData.getElementsByTagName('itunes');
+                url=xmlData.getElementsByTagName('url');
+                cache=xmlData.getElementsByTagName('cache');
+
+                arrmuzac = new Array();
+                arrcachefiles= new Array();
+                
+                for (i=0;i<songTitle.length;i++)
+                {
+                //in the line below, replace with the server path of your audio files. In the XML sheet put the track name
+                arrmuzac[arrmuzac.length]='http://www.seedsband.com/app/test/'+url[i].childNodes[0].nodeValue;
+                // if(cache[i].childNodes[0].nodeValue=='clear'){AppMobi.cache.removeFromMediaCache(arrmuzac[i]);}
+                muzac+="<table border-top='single #000'cellpadding='5px;'width='100%' style='background:url(\"images/bg.png\") repeat;color:white;border-top: solid 1px black'><tr><td width='15%'><img id='"+i+"'  src='images/buttons/Play.png' ontouchstart='nowplaying("+i+")' /></td><td width='15%'><img onLoad='cachedcheck("+i+");' style='display:none;'id='img"+i+"' src='images/loading_spinner.gif'/></td><td width='50%'><font size='2'>"+(songTitle[i].childNodes[0].nodeValue)+"</font></td></tr></table>";
+                }
+                cacheCheck();
+                               
+                // These event listeners fire after a item is added to the cache or if the cashe has been cleared
+              
+                    //Code below inserts parsed data into html 
+                    document.getElementById('Music').innerHTML=muzac;
+                    // resetDiv(document.getElementById('shows'));
+                }
+                document.addEventListener('appMobi.cache.media.add', cacheUpdated, false);
+function caching ()
+        {   
+            AppMobi.cache.addToMediaCache(arrcachefiles[newfiles]);
+        }
+function cacheCleared()
+        {
+            //alert("cache cleared successfully");
+        }
+function cacheUpdated(cacheobject)
+        {
+            for (imgsrc=0;imgsrc<arrmuzac.length;imgsrc++)
+            {
+            if(arrmuzac[imgsrc]==cacheobject.url){document.getElementById('img'+imgsrc).style.display='none';}
+            }
+            //alert(cacheobject.url +'cached');
+            if (newfiles<arrcachefiles.length-1){newfiles++;caching();}
+        }
+
+function cachedcheck(i)
+        {
+            //checks to see if media file is cached, if it isn't it caches it and turns on loading symbol
+            if(AppMobi.cache.getMediaCacheLocalURL(arrmuzac[i])==undefined)
+            {document.getElementById('img'+i).style.display='block';arrcachefiles[arrcachefiles.length]=arrmuzac[i];if(boolcache==0){boolcache=1;caching(i);}}
+        }
+
+function nowplaying(i)
+        {
+        // starts or stops cached audio 
+         if(i=='null'){return}
+         else if(playing==0){
+                var playUrl = url[i].childNodes[0].nodeValue.split("/").pop();
+                console.log(playUrl);
+                AppMobi.player.startAudio('_mediacache/'+playUrl);
+                playing=1;
+                play=i;
+                document.getElementById(i).src='images/buttons/Stop.png';
+
+        }
+         else if(playing==1 && i==play){AppMobi.player.toggleAudio();playing=0;document.getElementById(i).src='images/buttons/Play.png';} 
+        }
+        </script>
+<style></style>
+    </head>
+    <body>
+        <div id="jQUi">
+            <div id="splashscreen" class='ui-loader'>
+                <span class='ui-icon ui-icon-loading spin'></span><h1 >SEEDS</h1>
+            </div>
+            
+            <div id="header"></div>
+            <div id="content">
+                
+<div id='Home' title='News' class='panel' scrolling='yes'>
+  
+</div>
+
+<div id='Shows' title='Shows' class='panel' scrolling='no'>
+
+</div>
+
+<div id='Music' title='Music' class='panel' scrolling='no'>
+
+   <!-- <div class="widget_iframe" style="display:inline-block;width:100%;bottom:62px;margin:0;padding:0;border:0;"><iframe class="widget_iframe" src="http://www.reverbnation.com/widget_code/html_widget/artist_2972179?widget_id=50&posted_by=artist_2972179&pwc[design]=customized&pwc[background_color]=%23e6e2b5&pwc[included_songs]=1&pwc[photo]=0%2C1&pwc[size]=fit" width="100%" height="100%" frameborder="0" scrolling="no"></iframe></div> -->
+
+</div>
+
+<div id='Videos' title='Videos' class='panel' scrolling='no'>
+
+ <!-- <div class="widget_iframe" style="display:inline-block;width:100%;margin:0;padding:0;border:0;"><iframe class="widget_iframe" src="http://www.reverbnation.com/widget_code/html_widget/artist_2972179?widget_id=51&posted_by=artist_2972179&pwc[design]=customized&pwc[background_color]=%23e6e2b5&pwc[size]=custom" width="100%" height="100%" frameborder="0" scrolling="no"></iframe></div> -->
+
+</div>
+
+
+            </div>
+            <div id='navbar'>
+   <a href='#Home' data-transition='slide' class='icon home'>News</a>
+   <a href='#Shows' data-transition='slide' class='icon calendar'>Shows</a>
+   <a href='#Music' data-transition='slide' class='icon headset'>Music</a>
+   <a href='#Videos' data-transition='slide' class='icon camera'>Videos</a>
+</div>
+<nav><div class='title'>News</div><ul><li><a href='#Home' data-transition='slide'>News</a></li>
+<li><a href='#Shows' data-transition='slide'>Shows</a></li>
+<li><a href='#Music' data-transition='slide'>Music</a></li>
+<li><a href='#Videos' data-transition='slide'>Videos</a></li>
+</nav>
+
+            
+        </div>
+    </body>
+</html>

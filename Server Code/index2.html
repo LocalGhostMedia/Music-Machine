@@ -1,0 +1,121 @@
+<html>
+    
+    <head>
+        <title>Band App-Manager</title>
+		
+		
+		
+		<style type="text/css">
+			
+			 body {
+        background: #555 url(images/download.png);
+		font: 13px 'Lucida sans', Arial, Helvetica;
+        color: #eee;
+        text-align: center;
+    }
+    
+    a {
+        color: #ccc;
+    }
+    
+    /*-------------------------------------*/
+    
+    .cf:before, .cf:after{
+      content:"";
+      display:table;
+    }
+    
+    .cf:after{
+      clear:both;
+    }
+
+    .cf{
+		width:500px;
+		cursor:pointer;
+		
+      zoom:1;
+    }
+
+    /*-------------------------------------*/	
+    
+    .form-wrapper {
+        padding: 15px;
+        margin: 150px auto 50px auto;
+        background: #444;
+        background: rgba(0,0,0,.2);
+        -moz-border-radius: 10px;
+        -webkit-border-radius: 10px;
+        border-radius: 10px;
+        -moz-box-shadow: 0 1px 1px rgba(0,0,0,.4) inset, 0 1px 0 rgba(255,255,255,.2);
+        -webkit-box-shadow: 0 1px 1px rgba(0,0,0,.4) inset, 0 1px 0 rgba(255,255,255,.2);
+        box-shadow: 0 1px 1px rgba(0,0,0,.4) inset, 0 1px 0 rgba(255,255,255,.2);
+    }
+    
+    .form-wrapper input {
+        width: 330px;
+        height: 20px;
+        padding: 10px 5px;
+        float: left;    
+        font: bold 15px 'lucida sans', 'trebuchet MS', 'Tahoma';
+        border: 0;
+        background: #eee;
+        -moz-border-radius: 3px 0 0 3px;
+        -webkit-border-radius: 3px 0 0 3px;
+        border-radius: 3px 0 0 3px;      
+    }
+    
+    .form-wrapper input:focus {
+        outline: 0;
+        background: #fff;
+        -moz-box-shadow: 0 0 2px rgba(0,0,0,.8) inset;
+        -webkit-box-shadow: 0 0 2px rgba(0,0,0,.8) inset;
+        box-shadow: 0 0 2px rgba(0,0,0,.8) inset;
+    }
+    
+    .form-wrapper input::-webkit-input-placeholder {
+       color: #999;
+       font-weight: normal;
+       font-style: italic;
+    }
+    
+    .form-wrapper input:-moz-placeholder {
+        color: #999;
+        font-weight: normal;
+        font-style: italic;
+    }
+    
+    .form-wrapper input:-ms-input-placeholder {
+        color: #999;
+        font-weight: normal;
+        font-style: italic;
+    }    
+ /*   onclick="window.location='song.php'"
+        onclick="window.location='video.php'"
+        */
+   
+		</style>
+    </head>
+    
+    <body>
+        <p>
+            <center>Select what you want to do</center>
+        </p>
+       <center>
+            <table class="form-wrapper cf">
+                <tr>
+                    <td class="form-wrapper cf"onclick="window.location='song.php'"><center>Add A Song</center></td>
+                </tr>
+                <tr>
+                      <td class="form-wrapper cf"onclick="window.location='show.php'"><center>Add A Show</center></td>
+                </tr>
+                <tr>
+                     <td class="form-wrapper cf"onclick="window.location='news.php'"><center>Update Your News Feed</center></td>
+                </tr>
+				<tr>
+                     <td class="form-wrapper cf"onclick="window.location='video.php'"><center>Add a Video</center></td>
+                </tr>
+            </table>
+		</center>
+    </body>
+
+</html>
