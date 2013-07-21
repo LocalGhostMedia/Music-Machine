@@ -125,7 +125,7 @@
 	    </head>
 	    
 	    <body>
-	       <a href="index.html"> <div >Go Home</div></a> <center><h2>Add A Song</h2></center>
+	       <a href="index2.html"> <div >Go Home</div></a> <center><h2>Add A Song</h2></center>
 			 
 	        <form method="POST" enctype="multipart/form-data" style="margin-top:0px!important" class="form-wrapper cf" action="song.php">
 				<div id="showForm">
@@ -136,11 +136,12 @@
 								<input type="text" name="title" size="50">
 							</td>
 						</tr>
-						<tr>
-							<td>iTunes URL(Optional):</td><td>
+						<!-- feature coming soon to link right to itunes sstore for music -->
+						 <tr>
+							<td>iTunes URL(Coming Soon):</td><td>
 								<input type="text" name="itunes" size="50">
 							</td>
-						</tr>
+						</tr> 
 						<tr>
 							<td>Song file:</td><td>
 								<input type="file" name="uploadedfile" id='file'>

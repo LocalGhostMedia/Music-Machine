@@ -1,7 +1,7 @@
 <html>
     
     <head>
-        <title>Add A Video</title>
+        <title>Add A Video (Coming Soon)</title>
 		
 	
 		<script>

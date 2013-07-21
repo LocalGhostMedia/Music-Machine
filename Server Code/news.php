@@ -120,14 +120,17 @@
 	
 if (isset($_POST['title'])) {
 
+	// capture information from the form into vars
 	$title = $_POST['title'];
     $date = $_POST['date'];
     $content = $_POST['content'];
 	 
+	//open up XML sheet you'll be writing to
 	$file = "news.xml"; 
 	$fp2 = fopen($file, "r"); 
 	$data = fread($fp2, 80000);  
 	
+	// create new XML element and fill with obtained data
 	$sxe = new SimpleXMLElement($data);
 	
 	$show = $sxe->addChild('update');
@@ -138,6 +141,7 @@ if (isset($_POST['title'])) {
 	$path_dir= "news.xml"; 
 	$fp = fopen($path_dir, 'w+');
 	
+	// write back to file
 	$write = fwrite($fp, $sxe->asXML()); 
 	
 	} 
@@ -202,7 +206,7 @@ if (isset($_POST['delete'])) {
 		$xmlDoc = new DOMDocument();
 		$xmlDoc->load('news.xml');
 		$tableNum=0;
-		//get elements from "<channel>"
+		//get elements
 		for($i=$xmlDoc->getElementsByTagName('update')->length-1;$i>-1;$i--){
 			$channel=$xmlDoc->getElementsByTagName('update')->item($i);
 			$title = $channel->getElementsByTagName('title')
@@ -216,7 +220,6 @@ if (isset($_POST['delete'])) {
 			print('<div class="xml-table cf" id="table'.$i.'"><div style="float:left;"> Article #'.$tableNum.'</div><br><hr><form method="post" name="form'.$i.'" action="news.php"><input type="hidden" name="delete" value="'.$i.'"/><img src="images/cancel.png" onClick="delShow('.$i.')" style="cursor:pointer;width:30px;float:right;" /></form><table><tr><td>Title:</td><td>'.$title.'</td></tr><tr><td>Date:</td><td>'.$date.'</td></tr><tr><td>Content:</td><td>'.$content.'</td></tr></table></div>');
 		
 		}
-		//get and output "<item>" elements
 		
 		?>
 

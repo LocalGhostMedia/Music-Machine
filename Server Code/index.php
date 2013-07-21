@@ -1,9 +1,9 @@
 <?php
 $user = $_POST['user'];
 $pass = $_POST['pass'];
-
-if($user == "seeds"
-&& $pass == "growing")
+// Should add better php password protection
+if($user == "user"
+&& $pass == "password")
 {
         include("index2.html");
 }
