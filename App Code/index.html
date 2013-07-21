@@ -21,10 +21,12 @@
         var playing=0;
         var arrmuzac;
         var localSaves= new Array();
-        var websiteRoot='http://www.seedsband.com/app/';
+        
+        // website root is the url to the folder your PHP and XML sheets are located!
+        var websiteRoot='';
 
             function onDeviceReady() {
-                AppMobi.device.setRotateOrientation("portrait");
+            AppMobi.device.setRotateOrientation("portrait");
             AppMobi.device.setAutoRotate(false);
             //hide splash screen
             AppMobi.display.useViewport(320,480);
@@ -129,7 +131,7 @@
                             xmlData=parser.parseFromString(data,"text/xml");
                             xmlData.alltext = data;
                             gigs='';
-            /*
+                            /*
                             gigs="<ul data-position='static'><li><table style='background:#E6E2B5;width:100%'valign='top'><tr valign='top'><td width='25%'>Date</td><td>Venue</td><td>Price</td><td>Description</td></tr></li>";*/
 
                             showDate=xmlData.getElementsByTagName('date');

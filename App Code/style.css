@@ -71,7 +71,7 @@
 }
 @font-face
 {
-	font-family: name;
+	font-family: agent;
 	src: url(fonts/AgentOrange.ttf) format("truetype");
 }
-#pageTitle,#navbar{font-family: name;}
+#pageTitle,#navbar{font-family: agent;}
