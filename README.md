@@ -1,6 +1,9 @@
 Music-Machine
 =============
 
+Getting started Video: https://www.youtube.com/watch?v=mY4GJQmE5RY
+
+
 Overview:
 
 App and server code that anyone can use to create practically free mobile band applications.
