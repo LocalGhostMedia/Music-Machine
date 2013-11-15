@@ -15,5 +15,5 @@ if(isset($_POST)&&$pass!='growing')
         Pass <input type="TEXT" name="pass"></input>
         <input type="submit" name="submit"></input>
         </form>
-<?}
+<?php }
 ?>
