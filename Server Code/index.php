@@ -7,7 +7,7 @@ if($user == "user"
 {
         include("index2.html");
 }
-if(isset($_POST)&&$pass!='growing')
+if(isset($_POST)&&$pass!='password')
 {?>
 
         <form method="POST" action="index.php">
