@@ -1,19 +1,20 @@
-
 <!DOCTYPE html>
-<!--HTML5 doctype-->
-<html>
-    <head>
-        <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
-        <script type="text/javascript" charset="utf-8" src="http://localhost:58888/_appMobi/appmobi.js"></script>
-        <link rel='stylesheet' type='text/css' href='style.css' />
-<script src="http://debug-software.intel.com/target/target-script-min.js#78efdb06-6865-ff97-2e57-afd94b4f7aff"></script>
-        <script type="text/javascript" language="javascript">
-            // This event handler is fired once the AppMobi libraries are ready
+<html><!--HTML5 doctype-->
+
+<head>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta http-equiv="Pragma" content="no-cache">
+
+<script src="intelxdk.js"></script>
+<link rel="stylesheet" type="text/css" href="style.css">
+<script type="text/javascript" language="javascript">
+    // This event handler is fired once the AppMobi libraries are ready
 
 
+        var ytPlayer='';
+        var main;
         var newfiles=0;
         var imgsrc=0;
         var boolcache=0;
@@ -23,40 +24,45 @@
         var localSaves= new Array();
         
         // website root is the url to the folder your PHP and XML sheets are located!
-        var websiteRoot='';
+        var websiteRoot='http://www.localghostmedia.com/experiments/MM2/';
 
             function onDeviceReady() {
-            AppMobi.device.setRotateOrientation("portrait");
-            AppMobi.device.setAutoRotate(false);
-            //hide splash screen
-            AppMobi.display.useViewport(320,480);
-            AppMobi.device.hideSplashScreen();  
-            AppMobi.device.hideStatusBar();
-          
-            AppMobi.device.getRemoteData(websiteRoot+"song.xml","GET","","success_Songs","error_handler_song");
-            AppMobi.cache.addToMediaCacheExt(websiteRoot+"song.xml",'songs');
 
-            AppMobi.device.getRemoteData(websiteRoot+"show.xml","GET","","success_Shows","error_handler_show");
+            intel.xdk.device.setRotateOrientation("portrait");
+            intel.xdk.device.setAutoRotate(false);
+            //hide splash screen  
+            intel.xdk.display.useViewport(320,480);
+            intel.xdk.device.hideSplashScreen();  
+            intel.xdk.device.hideStatusBar();
+         
+            intel.xdk.device.getRemoteData(websiteRoot+"main.json","GET","","success_JSON","error_handler"); 
+            //intel.xdk.cache.addToMediaCacheExt(websiteRoot+"main.json",'mainJSON');alert("Hit");
+
+          /*  AppMobi.device.getRemoteData(websiteRoot+"show.xml","GET","","success_Shows","error_handler_show");
             AppMobi.cache.addToMediaCacheExt(websiteRoot+"show.xml",'shows');
 
             AppMobi.device.getRemoteData(websiteRoot+"news.xml","GET","","success_News","error_handler_news");
             AppMobi.cache.addToMediaCacheExt(websiteRoot+"news.xml",'news');
-                AppMobi.device.hideSplashScreen();
-               
+
+            AppMobi.device.getRemoteData(websiteRoot+"video.xml","GET","","success_Videos","error_handler_videos");
+            AppMobi.cache.addToMediaCacheExt(websiteRoot+"video.xml",'videos');
+            */
+            intel.xdk.device.hideSplashScreen();
+             
                 setTimeout(function(){
                     $.ui.launch();
                 },50);
             }
 
             //initial event handler to detect when appMobi is ready to roll
-            document.addEventListener("appMobi.device.ready",onDeviceReady,false);
+            document.addEventListener("intel.xdk.device.ready",onDeviceReady,false);
 
-
+            function onYouTubePlayerAPIReady() { ytPlayer = true}
 
 
             function cacheCheck(){
 
-                        localSaves = AppMobi.cache.getCookie('localSaves');
+                        localSaves = intel.xdk.cache.getCookie('localSaves');
                         console.log('localSaves= '+localSaves);
                         if(localSaves==undefined)
                             {console.log(arrmuzac.length);
@@ -66,7 +72,7 @@
                                     localSaves[i]=arrmuzac[i];
                                 };
 
-                            AppMobi.cache.setCookie('localSaves',localSaves,-1);
+                            intel.xdk.cache.setCookie('localSaves',localSaves,-1);
                              console.log('second localSaves= '+localSaves);
                             //console.log(localSaves);
                         }
@@ -89,109 +95,67 @@
             }
 
 
-            function error_handler_news(){              
-                            var localURL = AppMobi.cache.getMediaCacheLocalURL(websiteRoot+"news.xml");
-                            success_News(localURL);
+            function error_handler(e){       
+                            console.log(e);
+                            var localURL = intel.xdk.cache.getMediaCacheLocalURL(websiteRoot+"main.JSON");
+                            success_JSON(localURL);
                             }
-            function error_handler_show(){                
-                            var localURL = AppMobi.cache.getMediaCacheLocalURL(websiteRoot+"show.xml");
-                            success_Shows(localURL);
-                            }    
-            function error_handler_song(){                
-                            var localURL = AppMobi.cache.getMediaCacheLocalURL(websiteRoot+"song.xml");
-                            success_Songs(localURL);
-                            }    
 
-
-
-            function success_News (data)
+            function success_JSON (data)
                         {
+                            // Get JSON data and convert o JS object
+                            main = eval("(" + data + ")");
 
-                            parser=new DOMParser();
-                            xmlData=parser.parseFromString(data,"text/xml");
-                            xmlData.alltext = data;
+                            videos='';  
 
                             news='';
 
-                            newsTitle=xmlData.getElementsByTagName('title');
-                            newsPubdate=xmlData.getElementsByTagName('pubDate');
-                            newsContent=xmlData.getElementsByTagName('content');
-
-                            for (i=newsTitle.length-1;i>-1;i--)
-                            {
-                            news+="<center><table width='100%' class='newsTable newsArticle'><tr><td><strong>"+(newsTitle[i].childNodes[0].nodeValue)+"</strong><br><br>"+ (newsPubdate[i].childNodes[0].nodeValue)+"<br><br>"+(newsContent[i].childNodes[0].nodeValue)+"</td></tr></table></center>";
-                            }
-                             document.getElementById('Home').innerHTML=news;
-
-                        }
-
-            function success_Shows (data)
-                        {
-                            parser=new DOMParser();
-                            xmlData=parser.parseFromString(data,"text/xml");
-                            xmlData.alltext = data;
                             gigs='';
-                            /*
-                            gigs="<ul data-position='static'><li><table style='background:#E6E2B5;width:100%'valign='top'><tr valign='top'><td width='25%'>Date</td><td>Venue</td><td>Price</td><td>Description</td></tr></li>";*/
-
-                            showDate=xmlData.getElementsByTagName('date');
-                            showVenue=xmlData.getElementsByTagName('venue');
-                            showDescrip=xmlData.getElementsByTagName('description');
-                            showPrice=xmlData.getElementsByTagName('price');
-
-                           /*  for (i=0;i<showDate.length;i++)
-                            {
-                            gigs+="<br><table width='100%''><tr width='100%'><td width='25%'>"+(showDate[i].childNodes[0].nodeValue)+"</td><td width='50%'>"+ (showVenue[i].childNodes[0].nodeValue)+"</td><td>"+(showPrice[i].childNodes[0].nodeValue)+"</td></tr><tr></table><table class='showdesc'><tr><td>"+(showDescrip[i].childNodes[0].nodeValue)+"</td></tr></table><br>";
-                            }*/
-
-                            for (i=0;i<showDate.length;i++)
-                            {
-                            gigs+='<div class="showNum">Show #'+(i+1)+'</div><div  style="height:200px;margin-top:0px!important" class="form-wrapper cf" id="showForm"><div class="divRow"><div class="leftCol">Date:</div><div class="rightCol">'+(showDate[i].childNodes[0].nodeValue)+'</div></div><div class="divRow1"><div class="leftCol">Venue:</div><div class="rightCol">'+(showVenue[i].childNodes[0].nodeValue)+'</div></div><div class="divRow2"><div class="leftCol">Price:</div><div class="rightCol">'+(showPrice[i].childNodes[0].nodeValue)+'</div></div><div class="divRow3"><div class="leftCol">Location:</div><div class="rightCol">'+(showDescrip[i].childNodes[0].nodeValue)+'</div></div></div>';
-                            }
-                            document.getElementById('Shows').innerHTML=gigs;
-
-                            /*  gigs+='<div  style="margin-top:0px!important" class="form-wrapper cf" id="showForm">Show #'+(i+1)+'<table><tr height="20px"><td>Date:</td><td>'+(showDate[i].childNodes[0].nodeValue)+'</td></tr><tr><td>Venue:</td><td>'+ (showVenue[i].childNodes[0].nodeValue)+'</td></tr><tr><td>Price:</td><td>$'+(showPrice[i].childNodes[0].nodeValue)+'</td></tr><tr><td>Description:</td><td>'+(showDescrip[i].childNodes[0].nodeValue)+'</td></tr></table></div>'*/
-
-                            /*"<li><table style='width:100%;border-bottom:2px solid black; background:#798E19;'valign='top'><tr valign='top'><td width='20%'>"+(showDate[i].childNodes[0].nodeValue)+"</td><td width='30%'>"+ (showVenue[i].childNodes[0].nodeValue)+"</td><td style='padding-right:10px'width='5%'>"+(showPrice[i].childNodes[0].nodeValue)+"</td><td width='45%'>"+(showDescrip[i].childNodes[0].nodeValue)+"</td></tr></li>";*/
-
-                        }
-
-            function success_Songs (data) 
-                        { 
-                            // Un-comment out the code below to clear media cache of all songs previously loaded on device
-                            parser=new DOMParser();
-                            xmlData=parser.parseFromString(data,"text/xml");
-                            xmlData.alltext = data;
-
+                            
                             muzac='';
-
-                            songTitle=xmlData.getElementsByTagName('title');
-                            itunes=xmlData.getElementsByTagName('itunes');
-                            url=xmlData.getElementsByTagName('url');
-                            cache=xmlData.getElementsByTagName('cache');
 
                             arrmuzac = new Array();
                             arrcachefiles= new Array();
+
                             
-                            for (i=0;i<songTitle.length;i++)
+
+                            for (i=main.videos.length-1;i>-1;i--)
                             {
-                            //in the line below, replace with the server path of your audio files. In the XML sheet put the track name
-                            arrmuzac[arrmuzac.length]=websiteRoot+url[i].childNodes[0].nodeValue;
-                            // if(cache[i].childNodes[0].nodeValue=='clear'){AppMobi.cache.removeFromMediaCache(arrmuzac[i]);}
-                            muzac+="<table  border-top='single #000'cellpadding='5px;'width='100%' style='padding-top:5px;border-bottom: 1px solid #458B00;' ><tr ><td width='15%'><img id='"+i+"'  src='images/buttons/Play.png' ontouchstart='nowplaying("+i+")' /></td><td width='15%'><img onLoad='cachedcheck("+i+");' style='display:none;'id='img"+i+"' src='images/loading_spinner.gif'/></td><td width='50%'><font size='2'>"+(songTitle[i].childNodes[0].nodeValue)+"</font></td></tr></table>";
+                            videos+="<center><table width='100%' class='newsTable newsArticle'><tr><td><strong>"+main.videos[i].title+"</strong><br><br><iframe width='100%' height='100%' src='//www.youtube.com/embed/"+main.videos[i].link+"' frameborder='0'  ></iframe><br></td></tr></table></center>";
+                            }  
+
+                            for (i=main.news.length-1;i>-1;i--)
+                            {
+                            news+="<center><table width='100%' class='newsTable newsArticle'><tr><td><strong>"+main.news[i].title+"</strong><br><br>"+main.news[i].date+"<br><br>"+main.news[i].content+"</td></tr></table></center>";
+                            }
+
+                            for (i=0;i<main.shows.length;i++)
+                            {
+                            gigs+='<div class="showNum">Show #'+(i+1)+'</div><div  style="height:200px;margin-top:0px!important" class="form-wrapper cf" id="showForm"><div class="divRow0"><div class="leftCol">Date:</div><div class="rightCol">'+main.shows[i].date+'</div></div><div class="divRow1"><div class="leftCol">Venue:</div><div class="rightCol">'+main.shows[i].venue+'</div></div><div class="divRow2"><div class="leftCol">Price:</div><div class="rightCol">'+main.shows[i].price+'</div></div><div class="divRow3"><div class="leftCol">Location:</div><div class="rightCol">'+main.shows[i].location+'</div></div></div>';
+                            }
+                            for (i=0;i<main.songs.length;i++)
+                            {
+                           
+                            arrmuzac[arrmuzac.length]=websiteRoot+main.songs[i].url;
+                           
+                            muzac+="<table  border-top='single #000'cellpadding='5px;'width='100%' style='padding-top:5px;border-bottom: 1px solid #458B00;' ><tr ><td width='15%'><img id='"+i+"'  src='images/buttons/Play.png' ontouchstart='nowplaying("+i+")' /></td><td width='15%'><img onLoad='cachedcheck("+i+");' style='display:none;'id='img"+i+"' src='images/loading_spinner.gif'/></td><td width='50%'><font size='2'>"+main.songs[i].title+"</font></td></tr></table>";
                             }
                             cacheCheck();
                                            
-                            // These event listeners fire after a item is added to the cache or if the cashe has been cleared
-                          
-                                //Code below inserts parsed data into html 
-                                document.getElementById('muzacInject').innerHTML=muzac;
-                                // resetDiv(document.getElementById('shows'));
-                            }
-                            document.addEventListener('appMobi.cache.media.add', cacheUpdated, false);
+                            
+                            document.getElementById('muzacInject').innerHTML=muzac;
+                            document.getElementById('Shows').innerHTML=gigs;
+                            document.getElementById('Videos').innerHTML=videos;
+                            document.getElementById('Home').innerHTML=news;
+                            
+                        };         
+
+                        document.addEventListener('intel.xdk.cache.media.add', cacheUpdated, false);
+   
+                            
             function caching ()
                     {   
-                        AppMobi.cache.addToMediaCache(arrcachefiles[newfiles]);
+                        intel.xdk.cache.addToMediaCache(arrcachefiles[newfiles]);
                     }
             function cacheCleared()
                     {
@@ -210,9 +174,8 @@
             function cachedcheck(i)
                     {
                         //checks to see if media file is cached, if it isn't it caches it and turns on loading symbol
-                        if(AppMobi.cache.getMediaCacheLocalURL(arrmuzac[i])==undefined)
-                        {document.getElementById('img'+i).style.display='block';arrcachefiles[arrcachefiles.length]=arrmuzac[i];if(boolcache==0){boolcache=1;caching(i);}newfiles++
-                }
+                        if(intel.xdk.cache.getMediaCacheLocalURL(arrmuzac[i])==undefined)
+                        {document.getElementById('img'+i).style.display='block';arrcachefiles[arrcachefiles.length]=arrmuzac[i];if(boolcache==0){boolcache=1;caching(i);}newfiles++}
                     }
 
             function nowplaying(i)
@@ -220,75 +183,97 @@
                     // starts or stops cached audio 
                      if(i=='null'){return}
                      else if(playing==0){
-                            var playUrl = url[i].childNodes[0].nodeValue.split("/").pop();
+                            var playUrl = main.songs[i].url.split("/").pop();
                             console.log(playUrl);
-                            AppMobi.player.startAudio('_mediacache/'+playUrl);
+                            intel.xdk.player.startAudio('_mediacache/'+playUrl);
                             playing=1;
                             play=i;
                             document.getElementById(i).src='images/buttons/Stop.png';
 
+                        }
+                     else if(playing==1 && i==play){intel.xdk.player.toggleAudio();playing=0;document.getElementById(i).src='images/buttons/Play.png';} 
                     }
-                     else if(playing==1 && i==play){AppMobi.player.toggleAudio();playing=0;document.getElementById(i).src='images/buttons/Play.png';} 
-                    }
-        </script> 
-        
-        <style>
-            .newsArticle{
-                padding-bottom:20px;
+</script>
+
+<style>
+    .newsArticle{
+                padding-bottom:40px;
     border-bottom: 1px solid #458B00;
     margin:1.5em 0;
             }
-
-
-        </style>
-        
-        <script src="js/appframework.ui.min.js"></script>
-        <script>
-            $.ui.autoLaunch=false;
+</style>
+<script src="https://www.youtube.com/player_api"></script>
+<script src="js/appframework.ui.min.js"></script>
+<script>
+    $.ui.autoLaunch=false;
             $.ui.useOSThemes=false;
             $.ui.blockPageScroll();
             $(document).ready(function(){
                 if($.ui.useOSThemes&&!$.os.ios&&$("#afui").get(0).className!=="ios")
                 $("#afui").removeClass("ios");
             });
-        </script>
-        <link href="css/icons.css" rel="stylesheet" type="text/css"></link>
-        <link href="css/af.ui.css" rel="stylesheet" type="text/css"></link>
-    </head>
-    <body>
-        <div id="afui" class='android light'>
-          
-<div id="header"></div>
-          
-<div id="content" style="">
-	          
-	<div class="panel" title="News" data-nav="nav_0" id="Home" selected="selected" style="" data-appbuilder-object="page"></div>
-	<div class="panel" title="Shows" data-nav="nav_0" id="Shows" data-appbuilder-object="page" style=""></div>
-	<div class="panel" title="Music" data-nav="nav_0" id="Music" data-appbuilder-object="page" style=""><div id='bandPic'><center<img src='images/SEEDS' /></div></center><div id='muzacInject'></div></div>
-	<div class="panel" title="Videos" data-nav="nav_0" id="Videos" data-appbuilder-object="page" style="">
-        <div class="widget_iframe" style="display:inline-block;width:100%;top:10px;bottom:30px;margin:0;padding:0;border:0;"><iframe class="widget_iframe" src="http://www.reverbnation.com/widget_code/html_widget/artist_2972179?widget_id=51&posted_by=artist_2972179&pwc[design]=customized&pwc[background_color]=%23e6e2b5&pwc[size]=custom" width="100%" height="100%" frameborder="0" scrolling="no"></iframe>
+</script>
+<link href="css/icons.css" rel="stylesheet" type="text/css">
+<link href="css/af.ui.css" rel="stylesheet" type="text/css">
+</head>
+
+<div id="afui" class="android light">
+
+    <div id="header"></div>
+
+    <div id="content" style="">
+
+        <div class="panel" title="News" data-nav="nav_0" id="Home" selected="selected"
+        style="" data-appbuilder-object="page">
+           <!-- <div class="input_element form_element" style="width:100%;overflow:hidden" data-appbuilder-object="input">
+                <label>Input</label>
+                <input type="text" style="float:left;">
+            </div>
+            <div class="grid" data-appbuilder-object="grid3">
+                <div class="container col3" data-appbuilder-object="container"></div>
+                <div class="container col3" data-appbuilder-object="container"></div>
+                <div class="container col3" data-appbuilder-object="container"></div>
+            </div>-->
+        </div>
+        <div class="panel" title="Shows" data-nav="nav_0" id="Shows" data-appbuilder-object="page"
+        style=""></div>
+        <div class="panel" title="Music" data-nav="nav_0" id="Music" data-appbuilder-object="page"
+        style="">
+            <div id="bandPic">
+                <center<img src="images/SEEDS">
+                </center<img>
+            </div>
+            <div id="muzacInject"></div>
+        </div>
+        <div class="panel" title="Videos" data-nav="nav_0" id="Videos" data-appbuilder-object="page"
+        style="">
+
         </div>
     </div>
-</div>
-          
-<div id="navbar">
-	<a href="#Home" class="icon message">News</a><a href="#Shows" class="icon star">Shows</a><a href="#Music" class="icon headset">Music</a><a href="#Videos" class="icon camera">Videos</a>
-</div>
-        
-<header id="header_0" data-appbuilder-object="header">
-	     <a id="backButton" href="#" class="button back" style="visibility: hidden; ">Back</a>
-	<h1 id="pageTitle" class="">
+
+    <div id="navbar">
+        <a href="#Home" class="icon message">News</a><a href="#Shows" class="icon star">Shows</a>
+        <a href="#Music" class="icon headset">Music</a><a href="#Videos" class="icon camera">Videos</a>
+    </div>
+
+    <header id="header_0" data-appbuilder-object="header">
+        <a id="backButton" href="#" class="button back" style="visibility: hidden; ">Back</a>
+        <h1 id="pageTitle" class="">
 		test
 	</h1>
-	     
-</header>
-<nav id="nav_0" data-appbuilder-object="nav">
-	     
-	<h1>
+
+    </header>
+    <nav id="nav_0" data-appbuilder-object="nav">
+
+        <h1>
 		Side Menu
 	</h1>
-	     
-</nav>
-        </div>
-    </body>
+
+    </nav>
+</div>
+
+
+
+
+
 </html>
