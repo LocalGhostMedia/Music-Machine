@@ -125,48 +125,42 @@ if (isset($_POST['title'])) {
     $date = $_POST['date'];
     $content = $_POST['content'];
 	 
-	//open up XML sheet you'll be writing to
-	$file = "news.xml"; 
-	$fp2 = fopen($file, "r"); 
-	$data = fread($fp2, 80000);  
+	//open up JSON sheet you'll be writing to
+	$json = file_get_contents('main.json'); 
+	$data = json_decode($json, true);
+
+	$newsNum = count($data['news']);
+
+	$data['news'][$newsNum]['title'] = $title;
+	$data['news'][$newsNum]['date'] = $date;
+	$data['news'][$newsNum]['content'] = $content;
 	
-	// create new XML element and fill with obtained data
-	$sxe = new SimpleXMLElement($data);
-	
-	$show = $sxe->addChild('update');
-	$show->addChild('title', $title);
-	$show->addChild('pubDate', $date);
-	$show->addChild('content', $content);
-	
-	$path_dir= "news.xml"; 
+	$path_dir= "main.json"; 
 	$fp = fopen($path_dir, 'w+');
 	
-	// write back to file
-	$write = fwrite($fp, $sxe->asXML()); 
+	$sxe = json_encode($data);
+	$write = fwrite($fp, $sxe); 
 	
 	} 
 
 if (isset($_POST['delete'])) {
 		
-		$doc = new DOMDocument; 
-		$doc->load('news.xml');
-
-		$thedocument = $doc->documentElement;
-
-		//this gives you a list of the messages
-		$list = $thedocument->getElementsByTagName('update')->item($_POST['delete']);
-
-		//figure out which ones you want -- assign it to a variable (ie: $nodeToRemove )
-		$nodeToRemove = $list;
-		if ($nodeToRemove != null)
-		$thedocument->removeChild($nodeToRemove);
-
-		$doc->saveXML(); 
 		
-		$path_dir= "news.xml"; 
-		$fp = fopen($path_dir, 'w');
+		$json = file_get_contents('main.json'); 
+		$data = json_decode($json, true);
+
+		$newsToDel = $_POST['delete'];
+
+		unset($data['news'][$newsToDel]);
+
+		$data['news'] = array_values($data['news']);
 		
-		$write = fwrite($fp, $doc->saveXML());
+		$path_dir= "main.json"; 
+		$fp = fopen($path_dir, 'w+');
+		
+		$sxe = json_encode($data);
+		$write = fwrite($fp, $sxe); 
+		
 	}
 ?>
     </head>
@@ -203,18 +197,15 @@ if (isset($_POST['delete'])) {
         </form>
 		
 		<?php
-		$xmlDoc = new DOMDocument();
-		$xmlDoc->load('news.xml');
+		$json = file_get_contents('main.json'); 
+		$data = json_decode($json, true);
+
 		$tableNum=0;
 		//get elements
-		for($i=$xmlDoc->getElementsByTagName('update')->length-1;$i>-1;$i--){
-			$channel=$xmlDoc->getElementsByTagName('update')->item($i);
-			$title = $channel->getElementsByTagName('title')
-			->item(0)->nodeValue;
-			$date = $channel->getElementsByTagName('pubDate')
-			->item(0)->nodeValue;
-			$content = $channel->getElementsByTagName('content')
-			->item(0)->nodeValue;
+		for($i=count($data['news'])-1;$i>-1;$i--){
+			$title = $data['news'][$i]['title'];
+			$date = $data['news'][$i]['date'] ;
+			$content = $data['news'][$i]['content'] ;
 			
 			$tableNum++;
 			print('<div class="xml-table cf" id="table'.$i.'"><div style="float:left;"> Article #'.$tableNum.'</div><br><hr><form method="post" name="form'.$i.'" action="news.php"><input type="hidden" name="delete" value="'.$i.'"/><img src="images/cancel.png" onClick="delShow('.$i.')" style="cursor:pointer;width:30px;float:right;" /></form><table><tr><td>Title:</td><td>'.$title.'</td></tr><tr><td>Date:</td><td>'.$date.'</td></tr><tr><td>Content:</td><td>'.$content.'</td></tr></table></div>');

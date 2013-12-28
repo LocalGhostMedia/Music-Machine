@@ -7,7 +7,7 @@
 		<script>
 		var i=0;
 		function addShow(){
-			document.getElementById("showForm").innerHTML+='<div id="table'+i+'"><br><hr><img src="images/cancel.png" onClick="delShow('+i+')" style="cursor:pointer;width:30px;float:right;" /><table><tr><td>Title:</td><td><input type="text" name="show" size="50"></td></tr><tr><td>Link to Video:</td><td><input type="text" name="date" size="50"></td></tr><tr><td>Content:</td><td><input type="text" name="venue" size="50"></td></tr><tr><td>description:</td><td><input type="text" name="description" size="50"></td></tr><tr><td>price:</td><td><input type="text" name="price" size="50"></td></tr></table></div>'
+			document.getElementById("showForm").innerHTML+='<div id="table'+i+'"><br><hr><img src="images/cancel.png" onClick="delShow('+i+')" style="cursor:pointer;width:30px;float:right;" /><table><tr><td>Title:</td><td><input type="text" name="show" size="50"></td></tr><tr><td>Youtube ID:</td><td><input type="text" name="date" size="50"></td></tr><tr><td>Content:</td><td><input type="text" name="venue" size="50"></td></tr><tr><td>description:</td><td><input type="text" name="description" size="50"></td></tr><tr><td>price:</td><td><input type="text" name="price" size="50"></td></tr></table></div>'
 			i++;
 		}
 		function delShow(num){
@@ -127,7 +127,7 @@ if (isset($_POST['title'])) {
 
 
 
-	$thumb;
+	/*$thumb;
 	list($width, $height) = getimagesize($_FILES['file']['tmp_name']);
 	
 	$maxWidth= 400;
@@ -147,10 +147,10 @@ if (isset($_POST['title'])) {
 	    }
 	  else
 	    {
-	    /*echo "Upload: " . $_FILES["file"]["name"] . "<br>";
+	    echo "Upload: " . $_FILES["file"]["name"] . "<br>";
 	    echo "Type: " . $_FILES["file"]["type"] . "<br>";
 	    echo "Size: " . ($_FILES["file"]["size"] / 1024) . " kB<br>";
-	    echo "Temp file: " . $_FILES["file"]["tmp_name"] . "<br>";*/
+	    echo "Temp file: " . $_FILES["file"]["tmp_name"] . "<br>";
 
 	    if (file_exists("upload/" . $_FILES["file"]["name"]))
 	      {
@@ -170,33 +170,59 @@ if (isset($_POST['title'])) {
 	  {
 	  echo "<span style='color:red;font-size:30pt'>Invalid file, must be 400 by 200</span>";
 	  $thumb='';
-	  }
+	  }*/
 	$title = $_POST['title'];
     $link = $_POST['link'];
     
+	$json = file_get_contents('main.json'); 
+	$data = json_decode($json, true);
 	
+
+	$videoNum = count($data['videos']);//[0]['title']);
+	
+	/*
 	$file = "video.xml"; 
 	$fp2 = fopen($file, "r"); 
 	$data = fread($fp2, 80000);  
 	
 	$sxe = new SimpleXMLElement($data);
-	
+	*/
+	$data['videos'][$videoNum]['title'] = $title;
+	$data['videos'][$videoNum]['link'] = $link;
+	/*
 	$show = $sxe->addChild('video');
 	$show->addChild('title', $title);
 	$show->addChild('link', $link);
 	$show->addChild('thumb', $thumb);
-	
+	*/
 
-	$path_dir= "video.xml"; 
+	$path_dir= "main.json"; 
 	$fp = fopen($path_dir, 'w+');
 	
-	$write = fwrite($fp, $sxe->asXML()); 
+	$sxe = json_encode($data);
+	$write = fwrite($fp, $sxe); 
 	
 	} 
 
 if (isset($_POST['delete'])) {
+
+
+		$json = file_get_contents('main.json'); 
+		$data = json_decode($json, true);
+
+		$vidToDel = $_POST['delete'];
+
+		unset($data['videos'][$vidToDel]);
+
+		$data['videos'] = array_values($data['videos']);
 		
-		$doc = new DOMDocument; 
+		$path_dir= "main.json"; 
+		$fp = fopen($path_dir, 'w+');
+		
+		$sxe = json_encode($data);
+		$write = fwrite($fp, $sxe); 
+		
+	/*	$doc = new DOMDocument; 
 		$doc->load('video.xml');
 
 		$thedocument = $doc->documentElement;
@@ -214,14 +240,14 @@ if (isset($_POST['delete'])) {
 		$path_dir= "video.xml"; 
 		$fp = fopen($path_dir, 'w');
 		
-		$write = fwrite($fp, $doc->saveXML());
+		$write = fwrite($fp, $doc->saveXML());*/
 	}
 	
 ?>
     </head>
     
     <body>
-       <a href="index2.html"> <div >Go Home</div></a> <center><h2>Add A Video</h2></center>
+       <a href="index2.html"> <div>Go Home</div></a> <center><h2>Add A Video</h2></center>
 		 
         <form method="POST" style="margin-top:0px!important" class="form-wrapper cf" action="" enctype="multipart/form-data">
 			<div id="showForm">
@@ -233,15 +259,15 @@ if (isset($_POST['delete'])) {
 						</td>
 					</tr>
 					<tr>
-						<td>Link to Video:</td><td>
-							<input type="text" name="link" size="50">
+						<td>YouTube Id of Video:</td><td>
+							<input type="text" name="link" size="40">
 						</td>
 					</tr>
-					<tr>
+					<!-- <tr>
 						<td>Thumbnail:</td><td>
 							<input type="file" name="file" id='thumbnail'>
 						</td>
-					</tr>
+					</tr> -->
 				</table>
 				
 			   </div>
@@ -252,23 +278,30 @@ if (isset($_POST['delete'])) {
         </form>
 		
 		<?php
-		$xmlDoc = new DOMDocument();
-		$xmlDoc->load('video.xml');
+		$json = file_get_contents('main.json'); 
+		$data = json_decode($json, true);
+
 		$tableNum=0;
 		//get elements from "<channel>"
-		for($i=$xmlDoc->getElementsByTagName('video')->length-1;$i>-1;$i--){
-			$channel=$xmlDoc->getElementsByTagName('video')->item($i);
+		for($i=count($data['videos'])-1;$i>-1;$i--){
+
+			 $title =$data['videos'][$i]['title'];
+			 $link =$data['videos'][$i]['link'];
+
+			/*$channel=$xmlDoc->getElementsByTagName('video')->item($i);
 			$title = $channel->getElementsByTagName('title')
 			->item(0)->nodeValue;
 			$link = $channel->getElementsByTagName('link')
 			->item(0)->nodeValue;
 			$thumb = $channel->getElementsByTagName('thumb')
-			->item(0)->nodeValue;
+			->item(0)->nodeValue;*/
 			
 			$tableNum++;
-			print('<div class="xml-table cf" id="table'.$i.'"><div style="float:left;"> Video #'.$tableNum.'</div><br><hr><form method="post" name="form'.$i.'" action="video.php"><input type="hidden" name="delete" value="'.$i.'"/><img src="images/cancel.png" onClick="delShow('.$i.')" style="cursor:pointer;width:30px;float:right;" /></form><table><tr><td>Title:</td><td>'.$title.'</td></tr><tr><td>Link to Video:</td><td>'.$link.'</td></tr><tr><td>Thumbnail:</td><td><img src="'.$thumb.'"/></td></tr></table></div>');
+			print('<div class="xml-table cf" id="table'.$i.'"><div style="float:left;"> Video #'.$tableNum.'</div><br><hr><form method="post" name="form'.$i.'" action="video.php"><input type="hidden" name="delete" value="'.$i.'"/><img src="images/cancel.png" onClick="delShow('.$i.')" style="cursor:pointer;width:30px;float:right;" /></form><table><tr><td>Title:</td><td>'.$title.'</td></tr><tr><td>Video:</td><td><center><iframe width="100%" height="200px" src="//www.youtube.com/embed/'.$link.'" frameborder="0"  ></iframe></center></td></tr></table></div>');
 		
 		}
+
+		/* add for image :<tr><td>Thumbnail:</td><td><img src="'.$thumb.'"/></td></tr>*/
 		//get and output "<item>" elements
 		
 		?>

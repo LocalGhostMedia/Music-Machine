@@ -126,47 +126,44 @@ if (isset($_POST['title'])) {
     $location = $_POST['location'];
     $price = $_POST['price'];
 	 
-	$file = "show.xml"; 
-	$fp2 = fopen($file, "r"); 
-	$data = fread($fp2, 80000);  
+	$json = file_get_contents('main.json'); 
+	$data = json_decode($json, true);
+
+	$showNum = count($data['shows']);
 	
-	$sxe = new SimpleXMLElement($data);
+	$data['shows'][$showNum]['title'] = $title;
+	$data['shows'][$showNum]['date'] = $date;
+	$data['shows'][$showNum]['venue'] = $venue;
+	$data['shows'][$showNum]['location'] = $location;
+	$data['shows'][$showNum]['price'] = $price;
+
 	
-	$show = $sxe->addChild('show');
-	$show->addChild('title', $title);
-	$show->addChild('date', $date);
-	$show->addChild('venue', $venue);
-	$show->addChild('description', $location);
-	$show->addChild('price', $price);
-	
-	$path_dir= "show.xml"; 
+	$path_dir= "main.json"; 
 	$fp = fopen($path_dir, 'w+');
 	
-	$write = fwrite($fp, $sxe->asXML()); 
-	
+	$sxe = json_encode($data);
+	$write = fwrite($fp, $sxe); 
+
 	} 
 
 if (isset($_POST['delete'])) {
 		
-		$doc = new DOMDocument; 
-		$doc->load('show.xml');
-
-		$thedocument = $doc->documentElement;
-
-		//this gives you a list of the messages
-		$list = $thedocument->getElementsByTagName('show')->item($_POST['delete']);
-
-		//figure out which ones you want -- assign it to a variable (ie: $nodeToRemove )
-		$nodeToRemove = $list;
-		if ($nodeToRemove != null)
-		$thedocument->removeChild($nodeToRemove);
-
-		$doc->saveXML(); 
 		
-		$path_dir= "show.xml"; 
-		$fp = fopen($path_dir, 'w');
+		$json = file_get_contents('main.json'); 
+		$data = json_decode($json, true);
+
+		$showToDel = $_POST['delete'];
+
+		unset($data['shows'][$showToDel]);
+
+		$data['shows'] = array_values($data['shows']);
 		
-		$write = fwrite($fp, $doc->saveXML());
+		$path_dir= "main.json"; 
+		$fp = fopen($path_dir, 'w+');
+		
+		$sxe = json_encode($data);
+		$write = fwrite($fp, $sxe); 
+		
 	}
 ?>
     </head>
@@ -213,22 +210,19 @@ if (isset($_POST['delete'])) {
         </form>
 		
 		<?php
-		$xmlDoc = new DOMDocument();
-		$xmlDoc->load('show.xml');
+		$json = file_get_contents('main.json'); 
+		$data = json_decode($json, true);
+
 		$tableNum=0;
 		//get elements from "<channel>"
-		for($i=$xmlDoc->getElementsByTagName('show')->length-1;$i>-1;$i--){
-			$channel=$xmlDoc->getElementsByTagName('show')->item($i);
-			$title = $channel->getElementsByTagName('title')
-			->item(0)->nodeValue;
-			$date = $channel->getElementsByTagName('date')
-			->item(0)->nodeValue;
-			$venue = $channel->getElementsByTagName('venue')
-			->item(0)->nodeValue;
-			$location = $channel->getElementsByTagName('description')
-			->item(0)->nodeValue;
-			$price = $channel->getElementsByTagName('price')
-			->item(0)->nodeValue;
+		for($i=count($data['shows'])-1;$i>-1;$i--){
+
+			$title =$data['shows'][$i]['title'];
+			$date =$data['shows'][$i]['date'];
+			$venue =$data['shows'][$i]['venue'];
+			$location =$data['shows'][$i]['location'];
+			$price =$data['shows'][$i]['price'];
+
 			
 			$tableNum++;
 			print('<div class="xml-table cf" id="table'.$i.'"><div style="float:left;"> Show #'.$tableNum.'</div><br><hr><form method="post" name="form'.$i.'" action="show.php"><input type="hidden" name="delete" value="'.$i.'"/><img src="images/cancel.png" onClick="delShow('.$i.')" style="cursor:pointer;width:30px;float:right;" /></form><table><tr><td>Show Title:</td><td>'.$title.'</td></tr><tr><td>Date:</td><td>'.$date.'</td></tr><tr><td>Venue:</td><td>'.$venue.'</td></tr><tr><td>Location:</td><td>'.$location.'</td></tr><tr><td>Price:</td><td>$'.$price.'</td></tr></table></div>');

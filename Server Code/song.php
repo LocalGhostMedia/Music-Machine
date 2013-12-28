@@ -229,7 +229,7 @@
 					//Now we check the filesize.  If it is too big or too small then we reject it
 					//MP3 files should be at least 1MB and no more than 6.5 MB
 					 
-					if($filesize > 6920600){
+					if($filesize > 69206000){
 					//File is too large
 					 
 					if($flag == 0){
@@ -241,7 +241,7 @@
 					$flag = $flag + 1;
 					}
 					 
-					if($filesize < 228600){
+					if($filesize < 2286){
 					//File is too small
 					 
 					if($flag == 0){
@@ -326,69 +326,57 @@
 					$url = 'upload/'.$hashedfilename;//$_FILES['uploadedfile']['name'];
 				   
 					 
-					$file = "song.xml"; 
-					$fp2 = fopen($file, "r"); 
-					$data = fread($fp2, 80000);  
+					$json = file_get_contents('main.json'); 
+					$data = json_decode($json, true);
+	
+
+					$songsNum = count($data['songs']);
+
+					$data['songs'][$songsNum]['title'] = $title;
+					$data['songs'][$songsNum]['itunes'] = $itunes;
+					$data['songs'][$songsNum]['url'] = $url;
 					
-					$sxe = new SimpleXMLElement($data);
-					
-					$show = $sxe->addChild('song');
-					$show->addChild('title', $title);
-					$show->addChild('itunes', $itunes);
-					$show->addChild('url', $url);
-					$show->addChild('cache', $cache);
-					
-					$path_dir= "song.xml"; 
+					$path_dir= "main.json"; 
 					$fp = fopen($path_dir, 'w+');
 					
-					$write = fwrite($fp, $sxe->asXML()); 
+					$sxe = json_encode($data);
+					$write = fwrite($fp, $sxe); 
 				
 				} 
 
 			if (isset($_POST['delete'])) {
-					
-					$doc = new DOMDocument; 
-					$doc->load('song.xml');
 
-					$thedocument = $doc->documentElement;
+					$json = file_get_contents('main.json'); 
+					$data = json_decode($json, true);
 
+					$songToDel = $_POST['delete'];
+					$deleteURL = $data['songs'][$songToDel]['url'];
 
+					unset($data['songs'][$songToDel]);
 
-					//this gives you a list of the messages
-					$list = $thedocument->getElementsByTagName('song')->item($_POST['delete']);
-					$deleteURL = $list->getElementsByTagName('url')->item(0)->nodeValue;
+					$data['songs'] = array_values($data['songs']);
 
-					unlink($deleteURL);
 					echo'deleted off server :'.$deleteURL;
-					//figure out which ones you want -- assign it to a variable (ie: $nodeToRemove )
-					$nodeToRemove = $list;
-					if ($nodeToRemove != null)
-					$thedocument->removeChild($nodeToRemove);
 
-					$doc->saveXML(); 
+					$path_dir= "main.json"; 
+					$fp = fopen($path_dir, 'w+');
 					
-					$path_dir= "song.xml"; 
-					$fp = fopen($path_dir, 'w');
-					
-					$write = fwrite($fp, $doc->saveXML());
+					$sxe = json_encode($data);
+					$write = fwrite($fp, $sxe); 
 
-					
 				}
 			?>
 			<?php
-			$xmlDoc = new DOMDocument();
-			$xmlDoc->load('song.xml');
+			$json = file_get_contents('main.json'); 
+			$data = json_decode($json, true);
 			$tableNum=0;
 			//get elements from "<channel>"
-			for($i=$xmlDoc->getElementsByTagName('song')->length-1;$i>-1;$i--){
-				$channel=$xmlDoc->getElementsByTagName('song')->item($i);
-				$title = $channel->getElementsByTagName('title')
-				->item(0)->nodeValue;
-				$itunes = $channel->getElementsByTagName('itunes')
-				->item(0)->nodeValue;
-				$url = $channel->getElementsByTagName('url')
-				->item(0)->nodeValue;
-				
+			for($i=count($data['songs'])-1;$i>-1;$i--){
+
+				$title =$data['songs'][$i]['title'];
+			 	$itunes =$data['songs'][$i]['itunes'];
+			 	$url =$data['songs'][$i]['url'];
+								
 				$tableNum++;
 				print('<div class="xml-table cf" id="table'.$i.'"><div style="float:left;"> Song #'.$tableNum.'</div><br><hr><form method="post" name="form'.$i.'" action="song.php"><input type="hidden" name="delete" value="'.$i.'"/><img src="images/cancel.png" onClick="delShow('.$i.')" style="cursor:pointer;width:30px;float:right;" /></form><table><tr><td style="width:100px">Song Title:</td><td>'.$title.'</td></tr><tr><td>iTunes URL:</td><td>'.$itunes.'</td></tr><tr><td>URL to file:</td><td>'.$url.'</td></tr><tr><td>Listen to Song:</td><td><audio controls><source src="'.$url.'" type="audio/mpeg">Your browser does not support the audio element.</audio></td></tr></table></div>');
 			
